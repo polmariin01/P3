@@ -18,7 +18,6 @@ namespace upc {
       - autocorrelation acumulated for all the signal
       - autocorrelation divided by length
       **/
-      
       r[l] = 0;
       for (unsigned int n = l; n < x.size(); n++) {
         r[l] += x[n] * x[n - l];
