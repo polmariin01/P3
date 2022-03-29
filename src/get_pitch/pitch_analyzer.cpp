@@ -62,6 +62,7 @@ namespace upc {
     /// \TODO Implement a rule to decide whether the sound is voiced or not.
     /// * You can use the standard features (pot, r1norm, rmaxnorm),
     ///   or compute and use other ones.
+    if(rmaxnorm > 0.55) return false;
     return true;
   }
 
@@ -88,9 +89,13 @@ namespace upc {
     ///	   .
 	/// In either case, the lag should not exceed that of the minimum value of the pitch.
 
-    unsigned int lag = iRMax - r.begin();
+  for(iR = iRMax = r.begin() + npitch_min; iR < r.begin() + npitch_max; iR++){
+    if(*iR > *iRMax) iRMax = iR;
+  }
 
-    float pot = 10 * log10(r[0]);
+  unsigned int lag = iRMax - r.begin();
+
+  float pot = 10 * log10(r[0]);
 
     //You can print these (and other) features, look at them using wavesurfer
     //Based on that, implement a rule for unvoiced
@@ -104,5 +109,6 @@ namespace upc {
       return 0;
     else
       return (float) samplingFreq/(float) lag;
+      // trama sonora, devolvemos la frecuencia del pitch
   }
 }
