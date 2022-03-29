@@ -25,8 +25,10 @@ Usage:
     get_pitch --version
 
 Options:
+    -m FLOAT, --umaxnorm=FLOAT  Umbral de l'autocorrelacion a largo plazo [default: 0.5]
     -h, --help  Show this screen
     --version   Show the version of the project
+    
 
 Arguments:
     input-wav   Wave file with the audio signal
