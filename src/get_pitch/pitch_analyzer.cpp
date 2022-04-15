@@ -12,12 +12,13 @@ namespace upc {
 
     for (unsigned int l = 0; l < r.size(); ++l) {
   		/// \TODO Compute the autocorrelation r[l]
-      /**
-      \DONE Autocorrelation computated
-      - autocorrelation set to 0
-      - autocorrelation acumulated for all the signal
-      - autocorrelation divided by length
-      **/
+
+      /// \DONE Autocorrelation computated
+      ///    - Autocorrelation set to 0
+      ///    - Autocorrelation acumulated fot all the signal
+      ///    - Autocorrelation divided by length
+      ///    .
+      /// Autocorrelation acabose noseke saes     
       r[l] = 0;
       for (unsigned int n = l; n < x.size(); n++) {
         r[l] += x[n] * x[n - l];
