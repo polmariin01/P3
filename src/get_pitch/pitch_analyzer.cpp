@@ -18,7 +18,7 @@ namespace upc {
       ///    - Autocorrelation acumulated fot all the signal
       ///    - Autocorrelation divided by length
       ///    .
-      /// Autocorrelation acabose noseke saes     
+      /// Autocorrelation acabose noseke saes gil pito chico   
       r[l] = 0;
       for (unsigned int n = l; n < x.size(); n++) {
         r[l] += x[n] * x[n - l];
