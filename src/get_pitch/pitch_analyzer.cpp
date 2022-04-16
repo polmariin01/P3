@@ -86,7 +86,8 @@ namespace upc {
     //Compute correlation
     autocorrelation(x, r);
 
-    vector<float>::const_iterator iR;
+    vector<float>::const_iterator iR, iRMax;
+    /*
     bool negatiu = false;
     int max;
     float valor_max;
@@ -98,15 +99,14 @@ namespace upc {
         max = distance(r.begin(), iR); 
         valor_max  = *iR; 
       }
-    }
-  //
+    }*/
 
     /// \TODO 
 	/// Find the lag of the maximum value of the autocorrelation away from the origin.<br>
 	/// Choices to set the minimum value of the lag are:
 	///    - The first negative value of the autocorrelation.
 	///    - The lag corresponding to the maximum value of the pitch.
-    ///	   .
+  ///	   .
 	/// In either case, the lag should not exceed that of the minimum value of the pitch.
 
   for(iR = iRMax = r.begin() + npitch_min; iR < r.begin() + npitch_max; iR++){
@@ -114,7 +114,6 @@ namespace upc {
   }
 
   unsigned int lag = iRMax - r.begin();
-
   float pot = 10 * log10(r[0]);
 
     //You can print these (and other) features, look at them using wavesurfer
