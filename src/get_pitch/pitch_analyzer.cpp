@@ -86,7 +86,19 @@ namespace upc {
     //Compute correlation
     autocorrelation(x, r);
 
-    vector<float>::const_iterator iR = r.begin(), iRMax = iR;
+    vector<float>::const_iterator iR = r.begin(), iRMax = r.end();
+    bool negatiu = false;
+    int max;
+    float valor_max;
+    for(iR;iR != iRMax;iR++){
+      if(negatiu == false && iR<=0){
+        negatiu = true;
+      }
+      if(iR>valor_max){
+        max = distance(r.begin(), iR); 
+        valor_max  = iR; 
+      }
+    }
 
     /// \TODO 
 	/// Find the lag of the maximum value of the autocorrelation away from the origin.<br>
