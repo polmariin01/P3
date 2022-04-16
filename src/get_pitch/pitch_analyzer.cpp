@@ -6,6 +6,7 @@
 
 using namespace std;
 
+
 /// Name space of UPC
 namespace upc {
   void PitchAnalyzer::autocorrelation(const vector<float> &x, vector<float> &r) const {
@@ -18,7 +19,7 @@ namespace upc {
       ///    - Autocorrelation acumulated fot all the signal
       ///    - Autocorrelation divided by length
       ///    .
-      /// Autocorrelation acabose noseke saes gil pito chico   
+      /// Autocorrelation acaboso conserva tus sueños, nuca sabes cuando te haran falta :)
       r[l] = 0;
       for (unsigned int n = l; n < x.size(); n++) {
         r[l] += x[n] * x[n - l];
@@ -39,7 +40,12 @@ namespace upc {
     switch (win_type) {
     case HAMMING:
       /// \TODO Implement the Hamming window
+
+      /// \DONE Hamming window implemented 
       window.assign(frameLen, 1);
+      for(long unsigned int i=0;i<window.size();i++){  //hemos puesto long unsigned intpara que no salga un warning 
+         window[i] = 0.53836+ 0.46164*cos(3.141592*((2*i)/frameLen-1));
+      }
       break;
     case RECT:
     default:
