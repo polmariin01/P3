@@ -20,7 +20,7 @@ Ejercicios básicos
 	 autocorrelación de la señal y la posición del primer máximo secundario.
 
 	 NOTA: es más que probable que tenga que usar Python, Octave/MATLAB u otro programa semejante para
-	 hacerlo. Se valorará la utilización de la biblioteca matplotlib de Python.
+	 hacerlo.
 	 ![Imagte 2](img/captura1.jpg)
 
    * Determine el mejor candidato para el periodo de pitch localizando el primer máximo secundario de la
