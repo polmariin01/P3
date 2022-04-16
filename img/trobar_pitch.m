@@ -12,6 +12,7 @@ f0max = 500;    %Frecuencia máxima on buscarem el pitch
 Pmin = Fs / f0max;  %Periode mínim que pot tenir el pitch
 Pmax = Fs / f0min;  %Periode máxim que pot tenir el pitch
 
+%Calcula correlació
 for i = 1:N %aquest corre les r
    for n = i:N %aquest corre la senyal
        r(i) = r(i)+ x(n)*x(n-i+1); 
@@ -19,11 +20,13 @@ for i = 1:N %aquest corre les r
    r(i) = r(i)/N;
 end
 
-[M,I] = max( r(Pmin:Pmax)); %Maxim i Index del maxim localitzat entre els periodes que conté el pitch
-k0 = I + Pmin - 1
-f0 = Fs / k0
-p0 = 10*log10(M)
+%Maxim i Index del maxim localitzat entre els periodes que conté el pitch
+[M,I] = max( r(Pmin:Pmax));
+k0 = I + Pmin - 1;   %Mostra on està el màxim dins del vector r sencer
+f0 = Fs / k0;        %Frequencia en Hz del pitch
+p0 = 10*log10(M);   %Potencia en dB del màxim
 
+%Mostrar resultats
 figure;
 subplot(2,1,1);
 plot(0 : 1/Fs : T - 1/Fs , x);
