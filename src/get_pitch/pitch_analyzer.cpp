@@ -11,7 +11,6 @@ using namespace std;
 namespace upc {
   void PitchAnalyzer::autocorrelation(const vector<float> &x, vector<float> &r) const {
 
-    for (unsigned int l = 0; l < r.size(); ++l) {
   		/// \TODO Compute the autocorrelation r[l]
 
       /// \DONE Autocorrelation computated
@@ -19,7 +18,9 @@ namespace upc {
       ///    - Autocorrelation acumulated fot all the signal
       ///    - Autocorrelation divided by length
       ///    .
-      /// Autocorrelation acaboso conserva tus sueños, nuca sabes cuando te haran falta :)
+      /// Autocorrelation acabose conserva tus sueños, nuca sabes cuando te haran falta :)
+    //Calcul de la autocorrelació
+    for (unsigned int l = 0; l < r.size(); ++l) {
       r[l] = 0;
       for (unsigned int n = l; n < x.size(); n++) {
         r[l] += x[n] * x[n - l];
