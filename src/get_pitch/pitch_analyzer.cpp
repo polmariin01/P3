@@ -99,6 +99,7 @@ namespace upc {
         valor_max  = iR; 
       }
     }
+  //
 
     /// \TODO 
 	/// Find the lag of the maximum value of the autocorrelation away from the origin.<br>
