@@ -57,22 +57,15 @@ int main(int argc, const char *argv[]) {
 
 	std::string input_wav = args["<input-wav>"].asString();
 	std::string output_txt = args["<output-txt>"].asString();
-  cout << "arxius bé\n";
   float umaxnorm = stof(args["--umaxnorm"].asString()),
         u1norm   = stof(args["--u1norm"].asString()),
         upot     = stof(args["--upot"].asString()),
         uext     = stof(args["--uext"].asString());
-  cout << "constants inicials bé\n";
   //Provando
   for(auto const& arg : args) {
       std::cout << arg.first << ": " << arg.second << std::endl;
   }
   bool cc = args["--cclipping"].asBool();
-
-  //bool  cc = (args["--cc"].asString() == "TRUE")? true : false;
-  //cout << cc << "\n\n";
-  //int idk;
-  //cin >> idk;
 
   // Read input sound file
   unsigned int rate;
@@ -98,12 +91,11 @@ int main(int argc, const char *argv[]) {
   if (cc) {
     float ucc = 0.00025;
     for(iX = x.begin(); iX < x.end(); iX++){
-      cout << *iX << "\t";
+      //cout << *iX << "\t";
       if (abs(*iX) < ucc) *iX = 0;
-      cout << *iX << "\n";
+      //cout << *iX << "\n";
     }
   }
-
 
   // Iterate for each frame and save values in f0 vector
   //vector<float>::iterator iX;
@@ -120,8 +112,9 @@ int main(int argc, const char *argv[]) {
   /// \DONE Median filter
   /// Median filter, diria, no ho se, em fa por
   /// S'ha de testejar i tal yatusae
+  /// Cagun deu l'he fet pel mati tot d'una tirada i no he compilat res, casi em compila a la priemra i no se com va aah
   int i, j=0;
-  int median_error = 2;                 /// Nombre d'errors que pot corregir el filtre de mediana
+  int median_error = 3;                 /// Nombre d'errors que pot corregir el filtre de mediana
   int median_N = median_error * 2 + 1;  /// Tamany del filtre de mediana per a corregir n errors
   vector<float> f0_aux = f0;            /// Copia del vector f0 per a fer el processat
   float buffer_median[median_N];        /// Buffer per a calcular la mediana, fem una especie de circular queue
@@ -129,27 +122,26 @@ int main(int argc, const char *argv[]) {
   for (i = 0; i < median_error; i++) //Els primers valors seran iguals (el filtre comença a la mostra número 'median_error')
     f0[i] = f0_aux[i];
   
-  for (i = 0; i < median_N; i++){  //Coloquem els primers N valors a un vector auxiliar per a calcular la mediana
+  for (i = 0; i < median_N; i++)  //Coloquem els primers N valors a un vector auxiliar per a calcular la mediana
     buffer_median[i] = f0_aux[i];
-  }
 
   //Filtre de mediana comença
-  int k=0; /// Posició del nou element en el buffer
   float aux;
   for (i = median_error; i < f0.size() - median_error - 1; i++) { //Recorrem el vector f0
-    //for(j = 0; j < median_N; j++) { //Ordenem el buffer, bucle de cops que recorre el buffer
-    for(int j = 0; j < median_N - 1; j++){ /// \TODO Substituir aixo per un whil i probarho que funcioni bé, fer proves al MATLAB
+    j=0;
     while(j != median_N-1) {
       if(buffer_median[j] > buffer_median[j+1]){
         aux = buffer_median[j];                 //intercanvi de valors si no estan ordenats
         buffer_median[j] = buffer_median[j+1];
         buffer_median[j+1] = aux;
-        j--;                          //si ha hagut canvi, torna enrere per veure si ha de tornar-la a canviar la que ha baixat
-      } else{j++;}                    //si ja estaven ordenats, segueix avançant a ver que onda
+        j = (j>0)? j-2 : j;                          //si ha hagut canvi, torna enrere per veure si ha de tornar-la a canviar la que ha baixat
+      } 
+      j++;                   //si ja estaven ordenats, segueix avançant a ver que onda
     } //en principi esta ja el vector ordenat
     f0[i] = buffer_median[median_error]; //Posem el valor corresponent al vector f0
-    for(j=i-median_error; j<i+median_error;j++) //Tornem a crear el vector amb els valors directes del vector f0
-      buffer_median[j] = f0_aux[j];
+//    for(j=i-median_error; j<i+median_error;j++) 
+    for(j = 0; j < median_N; j++)  //Tornem a crear el vector amb els valors directes del vector f0
+      buffer_median[j] = f0_aux[i + j - median_error];
   }
 
   // Write f0 contour into the output file

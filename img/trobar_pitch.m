@@ -4,7 +4,7 @@ close all;
 %195 ms fins a 225 ms
 T = 30e-3;      %Periode de 30ms
 N = Fs * T;     %Number of samples per window
-n0 = 4200;      %Mostra on comença la finestra (8a finestra)
+n0 = 10000;      %Mostra on comença la finestra (8a finestra)
 x = y(n0+1:n0+N); %audio enfinestrat
 r = zeros(1,N); %aurocorrelació (l'hem possat del mateix tamany de x)
 f0min = 50;     %Frecuencia minima on buscarem el pitch
@@ -19,6 +19,8 @@ for i = 1:N %aquest corre les r
    end
    r(i) = r(i)/N;
 end
+
+%Calcula
 
 %Maxim i Index del maxim localitzat entre els periodes que conté el pitch
 [M,I] = max( r(Pmin:Pmax));

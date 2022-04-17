@@ -75,6 +75,7 @@ namespace upc {
     /// * Compara r[1]/r[0]
     /// * Compara r[lag]/r[0]
     /// * Compara potencia
+    /// * Compara extrems relatius de la autocorrelació
     /// .
     /// No acaba d'anar bé :(
 
