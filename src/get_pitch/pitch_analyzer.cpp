@@ -66,7 +66,7 @@ namespace upc {
       npitch_max = frameLen/2;
   }
 
-  bool PitchAnalyzer::unvoiced(float pot, float r1norm, float rmaxnorm) const {
+  bool PitchAnalyzer::unvoiced(float pot, float r1norm, float rmaxnorm, unsigned int ext) const {
     /// \TODO Implement a rule to decide whether the sound is voiced or not.
     /// * You can use the standard features (pot, r1norm, rmaxnorm),
     ///   or compute and use other ones.
@@ -79,7 +79,9 @@ namespace upc {
     /// No acaba d'anar bé :(
 
     cout.precision(6);
-    cout << fixed << "\n" << r1norm << "\t" << rmaxnorm << "\t" << pot << "\t";
+    cout << fixed << "\t" << r1norm << "\t" << rmaxnorm << "\t" << pot << "\t";
+
+    if(ext < uext) return false;
     if(r1norm > u1norm) return false;
     if(rmaxnorm > umaxnorm) return false;
     if(pot > upot) return false;
@@ -127,16 +129,15 @@ namespace upc {
   /// \DONE
   /// Diria, no estic gaire segur
   /// Aviam, diria que troba bé el màxim, pero
-  ///
-  ///
 
-
+  unsigned int ext = 0; //extrems (maxims o minims) que hi ha a la autocorrelació
   for(iR = iRMax = r.begin() + npitch_min; iR < r.begin() + npitch_max; iR++){
     if(*iR > *iRMax) iRMax = iR;
+    if(iR != r.begin() && iR != r.end() && (*iR-*prev(iR,1))*(*next(iR,1)-*iR) < 0) ext++;
   }
+  cout << "\n" << ext;
 
   unsigned int lag = iRMax - r.begin();
-
 
   float pot = 10 * log10(r[0]);
 
@@ -148,7 +149,7 @@ namespace upc {
       cout << pot << '\t' << r[1]/r[0] << '\t' << r[lag]/r[0] << endl;
 #endif
     
-    if (unvoiced(pot, r[1]/r[0], r[lag]/r[0]))
+    if (unvoiced(pot, r[1]/r[0], r[lag]/r[0], ext))
       return 0;
     else
       return (float) samplingFreq/(float) lag;
