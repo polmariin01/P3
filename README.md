@@ -14,9 +14,9 @@ Ejercicios básicos
   `get_pitch`.
 
    * Complete el cálculo de la autocorrelación e inserte a continuación el código correspondiente.
-   
-  			 ![Imagte 2](img/autocorrafacio.PNG)
-
+	<p align="center">
+	<img src="img/autocorrafacio.PNG">
+	</p>
    * Inserte una gŕafica donde, en un *subplot*, se vea con claridad la señal temporal de un segmento de
      unos 30 ms de un fonema sonoro y su periodo de pitch; y, en otro *subplot*, se vea con claridad la
 	 autocorrelación de la señal y la posición del primer máximo secundario.
@@ -27,10 +27,15 @@ Ejercicios básicos
 		 *En la primera gráfica observamos un fragmento de 30ms de la señal x, tiene 600 muestras.<br>
 		 En la segunda gràfica podemos ver la autocorrelación de esta gràfica. Tiene un máximo en 0.<br>
 		 El siguiente máximo lo encontramos en la muestra 126, que corresponde al pitch (f0=122Hz).
-		 Este máximo lo buscamos en el periodo (marcado en rojo) correspondiente a un pitch que se encuentre entre 500Hz (muestra 40) i 50Hz (muestra 400)*
+		 Este máximo lo buscamos en el periodo (marcado en rojo) correspondiente a un pitch que se
+		 encuentre entre 500Hz (muestra 40) i 50Hz (muestra 400)*
 
    * Determine el mejor candidato para el periodo de pitch localizando el primer máximo secundario de la
      autocorrelación. Inserte a continuación el código correspondiente.
+     
+     	<p align="center">
+	<img src="img/codi_pitch.PNG">
+	</p>
 
    * Implemente la regla de decisión sonoro o sordo e inserte el código correspondiente.
 
