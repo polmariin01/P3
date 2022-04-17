@@ -30,6 +30,7 @@ Options:
     -p FLOAT, --upot==FLOAT     Umbral de la potencia [default: -20]
     -e INT, --uext=INT          Umbral del numero de extremos [default:21]
     -c, --cclipping             Wether it does central clipping or not
+    -b, --verbose               For debugging purposes, shows on screen numbers and things while running the program
     -h, --help  Show this screen
     --version   Show the version of the project
     
@@ -65,7 +66,8 @@ int main(int argc, const char *argv[]) {
   for(auto const& arg : args) {
       std::cout << arg.first << ": " << arg.second << std::endl;
   }
-  bool cc = args["--cclipping"].asBool();
+  bool cc = args["--cclipping"].asBool();         /// Variable que determines wether center-cliping will be applied or not.
+  float verbose = args["--verbose"].asBool();     /// Chivatos y tal para ver que hacen las cosas
 
   // Read input sound file
   unsigned int rate;
@@ -108,42 +110,59 @@ int main(int argc, const char *argv[]) {
   /// \TODO
   /// Postprocess the estimation in order to supress errors. For instance, a median filter
   /// or time-warping may be used.
-
+  cout << "\n\nf0 antes\n";
+  for(int i=0; i<f0.size() ; i++)
+    cout << f0[i] << "\n";
   /// \DONE Median filter
   /// Median filter, diria, no ho se, em fa por
   /// S'ha de testejar i tal yatusae
   /// Cagun deu l'he fet pel mati tot d'una tirada i no he compilat res, casi em compila a la priemra i no se com va aah
   int i, j=0;
-  int median_error = 3;                 /// Nombre d'errors que pot corregir el filtre de mediana
+  int median_error = 6;                 /// Nombre d'errors que pot corregir el filtre de mediana
   int median_N = median_error * 2 + 1;  /// Tamany del filtre de mediana per a corregir n errors
   vector<float> f0_aux = f0;            /// Copia del vector f0 per a fer el processat
   float buffer_median[median_N];        /// Buffer per a calcular la mediana, fem una especie de circular queue
 
-  for (i = 0; i < median_error; i++) //Els primers valors seran iguals (el filtre comença a la mostra número 'median_error')
-    f0[i] = f0_aux[i];
-  
-  for (i = 0; i < median_N; i++)  //Coloquem els primers N valors a un vector auxiliar per a calcular la mediana
-    buffer_median[i] = f0_aux[i];
+  if (median_error > 0) {
+    for (i = 0; i < median_error; i++) //Els primers valors seran iguals (el filtre comença a la mostra número 'median_error')
+      f0[i] = f0_aux[i];
+    
+    for (i = 0; i < median_N; i++)  //Coloquem els primers N valors a un vector auxiliar per a calcular la mediana
+      buffer_median[i] = f0_aux[i];
 
-  //Filtre de mediana comença
-  float aux;
-  for (i = median_error; i < f0.size() - median_error - 1; i++) { //Recorrem el vector f0
-    j=0;
-    while(j != median_N-1) {
-      if(buffer_median[j] > buffer_median[j+1]){
-        aux = buffer_median[j];                 //intercanvi de valors si no estan ordenats
-        buffer_median[j] = buffer_median[j+1];
-        buffer_median[j+1] = aux;
-        j = (j>0)? j-2 : j;                          //si ha hagut canvi, torna enrere per veure si ha de tornar-la a canviar la que ha baixat
-      } 
-      j++;                   //si ja estaven ordenats, segueix avançant a ver que onda
-    } //en principi esta ja el vector ordenat
-    f0[i] = buffer_median[median_error]; //Posem el valor corresponent al vector f0
-//    for(j=i-median_error; j<i+median_error;j++) 
-    for(j = 0; j < median_N; j++)  //Tornem a crear el vector amb els valors directes del vector f0
-      buffer_median[j] = f0_aux[i + j - median_error];
+    //Filtre de mediana comença
+    float aux;
+    for (i = median_error; i < f0.size() - median_error; i++) { //Recorrem el vector f0
+      cout.precision(2);
+      //Chivato pa ver que ordena bien
+      //cout << "\n\n" << i << "\n";
+      cout << "\n\n";
+      for (j=0; j<median_N ; j++)
+        cout << buffer_median[j] << "\t";
+      j=0;
+      while(j != median_N-1) {
+        if(buffer_median[j] > buffer_median[j+1]){
+          aux = buffer_median[j];                 //intercanvi de valors si no estan ordenats
+          buffer_median[j] = buffer_median[j+1];
+          buffer_median[j+1] = aux;
+          j = (j>0)? j-2 : j;                          //si ha hagut canvi, torna enrere per veure si ha de tornar-la a canviar la que ha baixat
+        } 
+        j++;                   //si ja estaven ordenats, segueix avançant a ver que onda
+      } //en principi esta ja el vector ordenat
+
+      cout << "\n";
+      for (j=0; j<median_N ; j++)
+        cout << buffer_median[j] << "\t";
+
+      f0[i] = buffer_median[median_error]; //Posem el valor corresponent al vector f0
+  //    for(j=i-median_error; j<i+median_error;j++) 
+      for(j = 0; j < median_N; j++)  //Tornem a crear el vector amb els valors directes del vector f0
+        buffer_median[j] = f0_aux[i + j - median_error];
+    }
   }
-
+  cout << "\n\nDespués: \n";
+  for(i=0; i<f0.size() ; i++)
+    cout << f0[i] << "\n";
   // Write f0 contour into the output file
   ofstream os(output_txt);
   if (!os.good()) {
