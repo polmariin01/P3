@@ -6,19 +6,14 @@ T = 30e-3;      %Periode de 30ms
 N = Fs * T;     %Number of samples per window
 n0 = 4150;      %Mostra on comença la finestra (8a finestra)
 x = y(n0+1:n0+N); %audio enfinestrat
-r = zeros(1,N); %aurocorrelació (l'hem possat del mateix tamany de x)
+%r = zeros(1,N); %aurocorrelació (l'hem possat del mateix tamany de x)
 f0min = 50;     %Frecuencia minima on buscarem el pitch
 f0max = 500;    %Frecuencia máxima on buscarem el pitch
 Pmin = Fs / f0max;  %Periode mínim que pot tenir el pitch
 Pmax = Fs / f0min;  %Periode máxim que pot tenir el pitch
 
-%Calcula correlació
-for i = 1:N %aquest corre les r
-   for n = i:N %aquest corre la senyal
-       r(i) = r(i)+ x(n)*x(n-i+1); 
-   end
-   r(i) = r(i)/N;
-end
+r = correlation(x,N);
+save('correlacio.mat','r')
 
 %Calcula
 

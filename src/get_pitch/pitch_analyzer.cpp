@@ -10,7 +10,6 @@ using namespace std;
 /// Name space of UPC
 namespace upc {
   void PitchAnalyzer::autocorrelation(const vector<float> &x, vector<float> &r) const {
-
   		/// \TODO Compute the autocorrelation r[l]
 
       /// \DONE Autocorrelation computated
@@ -19,12 +18,15 @@ namespace upc {
       ///    - Autocorrelation divided by length
       ///    .
       /// Autocorrelation acabose conserva tus sueños, nuca sabes cuando te haran falta :)
+
     //Calcul de la autocorrelació
     for (unsigned int l = 0; l < r.size(); ++l) {
       r[l] = 0;
-      for (unsigned int n = l; n < x.size(); n++) {
-        r[l] += x[n] * x[n - l];
-      }
+      //for (unsigned int n = l; n < x.size(); n++) 
+      // r[l] += x[n] * x[n - l];
+      for (unsigned int n = l; n < x.size() - 1; n++) 
+        r[l] += x[n] * x[n + l];
+    
       r[l] /= x.size();
     }
 
@@ -44,8 +46,8 @@ namespace upc {
 
       /// \DONE Hamming window implemented 
       window.assign(frameLen, 1);
-      for(long unsigned int i=0;i<window.size();i++){  //hemos puesto long unsigned intpara que no salga un warning 
-         window[i] = 0.53836+ 0.46164*cos(3.141592*((2*i)/frameLen-1));
+      for(long unsigned int i=0; i<window.size(); i++){  //hemos puesto long unsigned intpara que no salga un warning 
+         window[i] = 0.53836 + 0.46164 * cos(3.14159265*((2*i)/(frameLen-1)));
       }
       break;
     case RECT:
@@ -80,13 +82,11 @@ namespace upc {
     /// No acaba d'anar bé :(
     if (verbose) {
       cout.precision(6);
-      cout << fixed << "\t" << r1norm << "\t" << rmaxnorm << "\t" << pot << "\t";
+      cout << fixed << "\t" << r1norm << "\t" << rmaxnorm << "\t" << pot << "\t" << samplingFreq << "\t" << frameLen << "\t";
     }
 
-    if(ext < uext) return false;
-    if(r1norm > u1norm) return false;
-    if(rmaxnorm > umaxnorm) return false;
-    if(pot > upot) return false;
+    //if( ext < uext || r1norm > u1norm || rmaxnorm > umaxnorm || pot > upot) return false;
+    if(r1norm > u1norm || rmaxnorm > umaxnorm || pot > upot) return false;
     if (verbose) cout << "sordo";
     return true;
   }
@@ -106,20 +106,6 @@ namespace upc {
     autocorrelation(x, r);
 
     vector<float>::const_iterator iR, iRMax;
-    /**
-    bool negatiu = false;
-    int max;
-    float valor_max;
-    for(iR = r.begin();iR != r.end();iR++){
-      if(negatiu == false && *iR<=0){
-        negatiu = true;
-      }
-      if(*iR>valor_max){
-        max = distance(r.begin(), iR); 
-        valor_max  = *iR; 
-      }
-    }
-    **/
 
     /// \TODO 
     /// Find the lag of the maximum value of the autocorrelation away from the origin.<br>
@@ -133,21 +119,21 @@ namespace upc {
     /// Diria, no estic gaire segur
     /// Aviam, diria que troba bé el màxim, pero
 
-  unsigned int ext = 0; //extrems (maxims o minims) que hi ha a la autocorrelació
-  for(iR = iRMax = r.begin() + npitch_min; iR < r.begin() + npitch_max; iR++){
-    if(*iR > *iRMax) iRMax = iR;
-    if(iR != r.begin() && iR != r.end() && (*iR-*prev(iR,1))*(*next(iR,1)-*iR) < 0) ext++;
-  }
-  if (verbose) cout << "\n" << ext;
+    unsigned int ext = 0; //extrems (maxims o minims) que hi ha a la autocorrelació
+    for(iR = iRMax = r.begin() + npitch_min; iR < r.begin() + npitch_max; iR++){
+      if(*iR > *iRMax) iRMax = iR;
+      if(iR != r.begin() && iR != r.end() && (*iR-*prev(iR,1))*(*next(iR,1)-*iR) < 0) ext++;
+    }
+    if (verbose) cout << "\n" << ext;
 
-  unsigned int lag = iRMax - r.begin();
+    unsigned int lag = iRMax - r.begin();
 
-  float pot = 10 * log10(r[0]);
+    float pot = 10 * log10(r[0]);
 
     //You can print these (and other) features, look at them using wavesurfer
     //Based on that, implement a rule for unvoiced
     //change to #if 1 and compile
-#if 0
+#if 1
     if (r[0] > 0.0F)
       cout << pot << '\t' << r[1]/r[0] << '\t' << r[lag]/r[0] << endl;
 #endif

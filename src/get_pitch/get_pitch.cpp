@@ -25,12 +25,14 @@ Usage:
     get_pitch --version
 
 Options:
-    -m FLOAT, --umaxnorm=FLOAT  Umbral de l'autocorrelacion a largo plazo [default: 0.49]
-    -n FLOAT, --u1norm=FLOAT    Umbral de l'autocorrelacion a corto plazo [default: 1.0]
+    -m FLOAT, --umaxnorm=FLOAT  Umbral de l'autocorrelacion a largo plazo [default: 0.4]
+    -n FLOAT, --u1norm=FLOAT    Umbral de l'autocorrelacion a corto plazo [default: 0.9]
     -p FLOAT, --upot=FLOAT      Umbral de la potencia [default: 0]
-    -e INT, --uext=INT          Umbral del numero de extremos [default: 21]
+    -c FLOAT, --cclipping       Relative threshold used for central clipping pre-processing [default: 0.009]
+    -e INT, --uext=INT          Umbral del numero de extremos relativos de la correlación [default: 100]
     -f INT, --medianfilt=INT    Number of errors that can be erased with a median filter (0 means no filter) [default: 0]
-    -c, --cclipping             Wether it does central clipping or not
+    -d INT, --downsampl=INT     Downsampling (+ LowPassFilter) factor (1 means no filter, d>=0) [default: 1]
+    -w INT, --lpfwindow=INT     LPW function (0: rectangular, 1: triangular) [default: 1]
     -v, --verbose               For debugging purposes, shows on screen numbers and things while running the program
     -h, --help  Show this screen
     --version   Show the version of the project
@@ -46,28 +48,38 @@ Arguments:
 bool verbose;
 
 int main(int argc, const char *argv[]) {
-	/// \TODO 
+	/// \TODO DOCOTP<br>
 	///  Modify the program syntax and the call to **docopt()** in order to
 	///  add options and arguments to the program.
 
-  /// \DONE Docotopt
+  /// \DONE DOCOPT<br>
   /// Docopt called with many arguments
-  ///
   ///
     std::map<std::string, docopt::value> args = docopt::docopt(USAGE,
         {argv + 1, argv + argc},	// array of arguments, without the program name
         true,    // show help if requested
         "2.0");  // version string
 
-	std::string input_wav   = args["<input-wav>"].asString();         /// Input WAV File
-	std::string output_txt  = args["<output-txt>"].asString();        /// Output TXT File
-  float umaxnorm          = stof(args["--umaxnorm"].asString()),    /// Umbral de decisió pel valor de r[lag]/r[0]
-        u1norm            = stof(args["--u1norm"].asString()),      /// Umbral de decisió pel valor de r[1]/r[0]
-        upot              = stof(args["--upot"].asString());        /// Umbral de decisió pel valor de la potencia
-  int   uext              = stoi(args["--uext"].asString());        /// Umbral de decisió pel nombre de extrems relatius de r[k]
-  int   median_error      = stoi(args["--medianfilt"].asString());  /// Nombre d'errors que poden ser eliminats amb postprocessat per filtre de mediana (0 vol dir que no s'aplica filtre)
-  bool cc                 = args["--cclipping"].asBool();           /// Variable que determines wether center-cliping will be applied or not.
+  // INICIALITZACIÓ VARIABLES FICADES ALS ARGUMENTS
+	std::string input_wav   = args["<input-wav>"].asString();         ///< Input WAV File
+	std::string output_txt  = args["<output-txt>"].asString();        ///< Output TXT File
+  float umaxnorm          = stof(args["--umaxnorm"].asString()),    ///< Umbral de decisió pel valor de r[lag]/r[0]
+        u1norm            = stof(args["--u1norm"].asString()),      ///< Umbral de decisió pel valor de r[1]/r[0]
+        upot              = stof(args["--upot"].asString()),        ///< Umbral de decisió pel valor de la potencia
+        cc                = stof(args["--cclipping"].asString());   ///< Variable que determines the value of the lindar in center-cliping, relative to the maximum of the signal.     
+  int   uext              = stoi(args["--uext"].asString());        ///< Umbral de decisió pel nombre de extrems relatius de r[k]
+  int   median_error      = stoi(args["--medianfilt"].asString()),  ///< Nombre d'errors que poden ser eliminats amb postprocessat per filtre de mediana (0 vol dir que no s'aplica filtre)
+        lpfwindow         = stoi(args["--lpfwindow"].asString()),   ///< Tipus de filtre passa baixes (0 - rectangular, 1 - triangular)
+        fN                = stoi(args["--downsampl"].asString());   ///< Factor de diezmado (1 quiere decir que no hay diezmado)
+  //bool cc                 = args["--cclipping"].asBool();       
   verbose                 = args["--verbose"].asBool();             /// Chivatos y tal para ver que hacen las cosas
+
+  int i, j;
+  float aux;                 
+
+  if (lpfwindow != 0 && lpfwindow != 1) lpfwindow = 1;
+  if (fN < 1 || fN > 64) fN = 1;
+  fN = 1;
 
   // Provando - chivato per veure el valor de les variables
   if (verbose) {
@@ -85,33 +97,63 @@ int main(int argc, const char *argv[]) {
     return -2;
   }
 
+  // rate /= fN;
   int n_len = rate * FRAME_LEN;
   int n_shift = rate * FRAME_SHIFT;
 
   // Define analyzer
-  PitchAnalyzer analyzer(n_len, rate,umaxnorm, u1norm, upot, uext,PitchAnalyzer::HAMMING, 50, 500);
+  PitchAnalyzer analyzer(n_len, rate, umaxnorm, u1norm, upot, uext, PitchAnalyzer::RECT, 50, 500);
 
   // PREPROCESSING
-  /// \TODO Preprocessing
+  /// \TODO PRE-PROCESSING<br>
   /// Preprocess the input signal in order to ease pitch estimation. For instance,
   /// central-clipping or low pass filtering may be used.
   
-  /// \DONE Central-clipping
+  /// \DONE PRE-PROCESSING. Central-clipping<br>
   /// If central clipping is enabled (--cclipping has been called), the signal will be central clipped, clipping threshold is 2.5e-4
   vector<float>::iterator iX;
-  if (cc) {                   
+  float max_x = *max_element(x.begin(), x.end());
+  if (cc > 0) {                   
     if (verbose) cout << "\n\n**************\nCenter cliping**************\n\nBefore cc\tAfter cc\n";
-    float ucc = 0.00025;
     for(iX = x.begin(); iX < x.end(); iX++){
       if (verbose) cout << *iX << "\t";
-      if (abs(*iX) < ucc) *iX = 0;
+      if ( (abs(*iX) / max_x ) < cc) *iX = 0;
+//      if (abs(*iX) < ucc) *iX = 0;
       if (verbose) cout << *iX << "\n";
     }
   }
 
   /// \TODO Low pass filtering and down sampling
+  if (fN > 1) {
+    int nouS = x.size()/fN;
+    vector<float> x_ds(nouS); // X downsampled
+    if (verbose) cout << "\n\n*******************\nLPF & down-sampling\n*******************\n";
 
-
+    if(lpfwindow == 0) {
+      // Filtre rectangular de N mostres
+      if (verbose) cout << "FILTRE RECTANGULAR, n = " << fN << "\n";
+      for(i = 0; i < nouS; i++){
+        x_ds[i] = x[fN*i];
+        for (j = 1; j < fN; j++) {
+          x_ds[i] += x[fN*i + j];
+        }
+        x_ds[i] = x_ds[i] / fN;
+      }
+    } else {
+      //Filtre triangular de N mostres
+      if (verbose) cout << "FILTRE TRIANGULAR, n = " << fN << "\n";
+      for (i = 0; i < nouS; i++) {
+        x_ds[i] = x[fN*i];
+        for (j = 1; j < fN; j++) {
+          aux = (i>0)? x[fN*i + j] + x[fN*i - j] : x[fN*i + j];
+          x_ds[i] += (1 - j / fN) * aux;
+        }
+        x_ds[i] = (i>0)? aux / fN : (aux*2 / (fN+1));
+      }
+    }
+    x.resize(nouS);
+    x = x_ds;
+  }
 
   // PROCESSING
   /// Processing
@@ -140,7 +182,6 @@ int main(int argc, const char *argv[]) {
   if (median_error > 0) {     // Si entra aqui vol dir que d'utilitza filtre de mediana
     if (verbose) cout << "\n*****************\nFiltre de mediana\n*****************"; //chivato filtre de mediana i tal
 
-    int i, j;                 
     int median_N = median_error * 2 + 1;  /// Tamany del filtre de mediana per a corregir n errors
     vector<float> f0_aux = f0;            /// Copia del vector f0 per a fer el processat
     float buffer_median[median_N];        /// Buffer per a calcular la mediana, fem una especie de circular queue

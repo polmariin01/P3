@@ -27,13 +27,15 @@ namespace upc {
     void set_window(Window type); ///< pre-compute window
 
   private:
-    std::vector<float> window; ///< precomputed window
-    unsigned int frameLen, ///< length of frame (in samples). Has to be set in the constructor call
-      samplingFreq, ///< sampling rate (in samples per second). Has to be set in the constructor call
-      npitch_min, ///< minimum value of pitch period, in samples
-      npitch_max, ///< maximum value of pitch period, in samples
-      uext; ///umbral d'extrems a la autocorrelació
-    float umaxnorm, u1norm, upot;
+    std::vector<float> window;    ///< precomputed window
+    unsigned int  frameLen,       ///< length of frame (in samples). Has to be set in the constructor call
+                  samplingFreq,   ///< sampling rate (in samples per second). Has to be set in the constructor call
+                  npitch_min,     ///< minimum value of pitch period, in samples
+                  npitch_max,     ///< maximum value of pitch period, in samples
+                  uext;           ///< umbral d'extrems a la autocorrelació
+    float         umaxnorm,       ///< umbral de r[lag]/r[0]
+                  u1norm,         ///< umbral de r[1]/r[0]
+                  upot;           ///< umbral de potencia
 
 	///
 	/// Computes correlation from lag=0 to r.size()
@@ -53,14 +55,14 @@ namespace upc {
 
   public:
     PitchAnalyzer(	unsigned int fLen,			///< Frame length in samples
-					unsigned int sFreq,			///< Sampling rate in Hertzs
-          float umaxnorm_,
-          float u1norm_,
-          float upot_,
-          unsigned int uext_,
+					unsigned int sFreq,			          ///< Sampling rate in Hertzs
+          float umaxnorm_,                  ///< Threshold for r[lag]/r[0] (pitch)
+          float u1norm_,                    ///< Threshold for r[1]/r[0]
+          float upot_,                      ///< Threshold for power
+          unsigned int uext_,               ///< Threshold for relative extrems of r[k]
 					Window w=PitchAnalyzer::HAMMING,	///< Window type
-					float min_F0 = MIN_F0,		///< Pitch range should be restricted to be above this value
-					float max_F0 = MAX_F0		///< Pitch range should be restricted to be below this value
+					float min_F0 = MIN_F0,		        ///< Pitch range should be restricted to be above this value
+					float max_F0 = MAX_F0		          ///< Pitch range should be restricted to be below this value
 				 )
 	{
       frameLen = fLen;
