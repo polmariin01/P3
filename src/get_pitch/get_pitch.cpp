@@ -117,11 +117,15 @@ int main(int argc, const char *argv[]) {
   /// Processing
   // f0 vector creation
   // Iterate for each frame and save values in f0 vector
+  if (verbose) cout << "\n\n*****************\nProcessat\n*****************\nEXT\tr[1]/r[0]\tr[lag]/r[0]\tPot";
   vector<float> f0;
   for (iX = x.begin(); iX + n_len < x.end(); iX = iX + n_shift) {
     float f = analyzer(iX, iX + n_len);
     f0.push_back(f);
   }
+  if (verbose) cout << "\n";
+  // END PROCESSING
+
 
 
   // POST-PROCESSING
@@ -129,41 +133,39 @@ int main(int argc, const char *argv[]) {
   /// Postprocess the estimation in order to supress errors. For instance, a median filter
   /// or time-warping may be used.
 
-  /** Chivato(?) - f0 abans del filtre de mediana 
-  cout << "\n\nf0 antes\n";
-  for(int i=0; i<f0.size() ; i++)
-    cout << f0[i] << "\n"; **/
-
   /// \DONE Median filter
   /// Median filter, diria, no ho se, em fa por
   /// S'ha de testejar i tal yatusae
   /// Cagun deu l'he fet pel mati tot d'una tirada i no he compilat res, casi em compila a la priemra i no se com va aah
-  if (median_error > 0) {
-    int i, j=0;                 
+  if (median_error > 0) {     // Si entra aqui vol dir que d'utilitza filtre de mediana
+    if (verbose) cout << "\n*****************\nFiltre de mediana\n*****************"; //chivato filtre de mediana i tal
+
+    int i, j;                 
     int median_N = median_error * 2 + 1;  /// Tamany del filtre de mediana per a corregir n errors
     vector<float> f0_aux = f0;            /// Copia del vector f0 per a fer el processat
     float buffer_median[median_N];        /// Buffer per a calcular la mediana, fem una especie de circular queue
 
-    if (verbose) cout << "\n\n*****************\nFiltre de mediana\n*****************"; //chivato filtre de mediana i tal
-    for (i = 0; i < median_error; i++) //Els primers valors seran iguals (el filtre comença a la mostra número 'median_error')
+    //S'inicialitzen els valors per a fer el filtre
+    for (i = 0; i < median_error; i++)    // Els primers valors seran iguals (el filtre comença a la mostra número 'median_error')
       f0[i] = f0_aux[i];
     
-    for (i = 0; i < median_N; i++)  //Coloquem els primers N valors a un vector auxiliar per a calcular la mediana
+    for (i = 0; i < median_N; i++)        // Coloquem els primers N valors a un vector auxiliar per a calcular la mediana
       buffer_median[i] = f0_aux[i];
 
     //Filtre de mediana comença
     float aux;
-    for (i = median_error; i < f0.size() - median_error; i++) { //Recorrem el vector f0
-      //if (verbose) cout.precision(2);
-      //Chivato pa ver que ordena bien
+    for (i = median_error; i < f0.size() - median_error; i++) { // Recorrem el vector f0
+
+      // Chivato pa ver que ordena bien
       if (verbose) { //primera part del chivato, el buffer de tamany median_N sense ordenar
         //cout << "\n\n" << i << "\n";
         cout << "\n";
         for (j=0; j<median_N ; j++)
           cout << buffer_median[j] << "\t";
-      }
+      } //Just a chivato nvm
+
       j=0;
-      while(j != median_N-1) {
+      while(j != median_N-1) {  /// \TODO Cambiar esto por un for iria bien?
         if(buffer_median[j] > buffer_median[j+1]){
           aux = buffer_median[j];                 //intercanvi de valors si no estan ordenats
           buffer_median[j] = buffer_median[j+1];
@@ -174,26 +176,20 @@ int main(int argc, const char *argv[]) {
         j++;                   //si ja estaven ordenats, segueix avançant a ver que onda
       } //en principi esta ja el vector ordenat
 
-      if (verbose) { //Segona part del filtre, el buffer ordenat
+      if (verbose) { //Segona part del chivato, el buffer ordenat
         cout << "\n";
         for (j=0; j<median_N ; j++)
-          cout << buffer_median[j] << "\t";
-      
+          cout << buffer_median[j] << "\t";      
         cout << "\n";      
-      }
-
+      } //Just a chivato
       f0[i] = buffer_median[median_error]; //Posem el valor corresponent al vector f0
-  //    for(j=i-median_error; j<i+median_error;j++) 
       for(j = 0; j < median_N; j++)  //Tornem a crear el vector amb els valors directes del vector f0
         buffer_median[j] = f0_aux[i + j - median_error];
     }
   }
-
-  /** Chivato (?)
-  cout << "\n\nDespués: \n";
-  for(i=0; i<f0.size() ; i++)
-    cout << f0[i] << "\n";
-  **/
+  //Aqui acaba el filtre de mediana, pa ir ubicaos i tal
+  //END POST-PROCESSING                          
+  if (verbose) cout << "\n\n*****************\nProcessat acabat!\n*****************\n\n";
 
 
   // Write f0 contour into the output file
