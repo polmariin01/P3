@@ -78,15 +78,16 @@ namespace upc {
     /// * Compara extrems relatius de la autocorrelació
     /// .
     /// No acaba d'anar bé :(
-
-    cout.precision(6);
-    cout << fixed << "\t" << r1norm << "\t" << rmaxnorm << "\t" << pot << "\t";
+    if (verbose) {
+      cout.precision(6);
+      cout << fixed << "\t" << r1norm << "\t" << rmaxnorm << "\t" << pot << "\t";
+    }
 
     if(ext < uext) return false;
     if(r1norm > u1norm) return false;
     if(rmaxnorm > umaxnorm) return false;
     if(pot > upot) return false;
-    cout << "sordo culero";
+    if (verbose) cout << "sordo";
     return true;
   }
 
@@ -105,7 +106,7 @@ namespace upc {
     autocorrelation(x, r);
 
     vector<float>::const_iterator iR, iRMax;
-    /*
+    /**
     bool negatiu = false;
     int max;
     float valor_max;
@@ -117,26 +118,27 @@ namespace upc {
         max = distance(r.begin(), iR); 
         valor_max  = *iR; 
       }
-    }*/
+    }
+    **/
 
     /// \TODO 
-	/// Find the lag of the maximum value of the autocorrelation away from the origin.<br>
-	/// Choices to set the minimum value of the lag are:
-	///    - The first negative value of the autocorrelation.
-	///    - The lag corresponding to the maximum value of the pitch.
-  ///	   .
-	/// In either case, the lag should not exceed that of the minimum value of the pitch.
+    /// Find the lag of the maximum value of the autocorrelation away from the origin.<br>
+    /// Choices to set the minimum value of the lag are:
+    ///    - The first negative value of the autocorrelation.
+    ///    - The lag corresponding to the maximum value of the pitch.
+    ///	   .
+    /// In either case, the lag should not exceed that of the minimum value of the pitch.
 
-  /// \DONE
-  /// Diria, no estic gaire segur
-  /// Aviam, diria que troba bé el màxim, pero
+    /// \DONE
+    /// Diria, no estic gaire segur
+    /// Aviam, diria que troba bé el màxim, pero
 
   unsigned int ext = 0; //extrems (maxims o minims) que hi ha a la autocorrelació
   for(iR = iRMax = r.begin() + npitch_min; iR < r.begin() + npitch_max; iR++){
     if(*iR > *iRMax) iRMax = iR;
     if(iR != r.begin() && iR != r.end() && (*iR-*prev(iR,1))*(*next(iR,1)-*iR) < 0) ext++;
   }
-  cout << "\n" << ext;
+  if (verbose) cout << "\n" << ext;
 
   unsigned int lag = iRMax - r.begin();
 

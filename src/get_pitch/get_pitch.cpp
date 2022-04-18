@@ -26,11 +26,12 @@ Usage:
 
 Options:
     -m FLOAT, --umaxnorm=FLOAT  Umbral de l'autocorrelacion a largo plazo [default: 0.49]
-    -n FLOAT, --u1norm==FLOAT   Umbral de l'autocorrelacion a corto plazo [default: 1.0]
-    -p FLOAT, --upot==FLOAT     Umbral de la potencia [default: -20]
-    -e INT, --uext=INT          Umbral del numero de extremos [default:21]
+    -n FLOAT, --u1norm=FLOAT    Umbral de l'autocorrelacion a corto plazo [default: 1.0]
+    -p FLOAT, --upot=FLOAT      Umbral de la potencia [default: 0]
+    -e INT, --uext=INT          Umbral del numero de extremos [default: 21]
+    -f INT, --medianfilt=INT    Number of errors that can be erased with a median filter (0 means no filter) [default: 0]
     -c, --cclipping             Wether it does central clipping or not
-    -b, --verbose               For debugging purposes, shows on screen numbers and things while running the program
+    -v, --verbose               For debugging purposes, shows on screen numbers and things while running the program
     -h, --help  Show this screen
     --version   Show the version of the project
     
@@ -42,13 +43,15 @@ Arguments:
                     - If considered unvoiced, f0 must be set to f0 = 0
 )";
 
+bool verbose;
+
 int main(int argc, const char *argv[]) {
 	/// \TODO 
 	///  Modify the program syntax and the call to **docopt()** in order to
 	///  add options and arguments to the program.
 
   /// \DONE Docotopt
-  /// We 
+  /// Docopt called with many arguments
   ///
   ///
     std::map<std::string, docopt::value> args = docopt::docopt(USAGE,
@@ -56,18 +59,23 @@ int main(int argc, const char *argv[]) {
         true,    // show help if requested
         "2.0");  // version string
 
-	std::string input_wav = args["<input-wav>"].asString();
-	std::string output_txt = args["<output-txt>"].asString();
-  float umaxnorm = stof(args["--umaxnorm"].asString()),
-        u1norm   = stof(args["--u1norm"].asString()),
-        upot     = stof(args["--upot"].asString()),
-        uext     = stof(args["--uext"].asString());
-  //Provando
-  for(auto const& arg : args) {
-      std::cout << arg.first << ": " << arg.second << std::endl;
+	std::string input_wav   = args["<input-wav>"].asString();         /// Input WAV File
+	std::string output_txt  = args["<output-txt>"].asString();        /// Output TXT File
+  float umaxnorm          = stof(args["--umaxnorm"].asString()),    /// Umbral de decisió pel valor de r[lag]/r[0]
+        u1norm            = stof(args["--u1norm"].asString()),      /// Umbral de decisió pel valor de r[1]/r[0]
+        upot              = stof(args["--upot"].asString());        /// Umbral de decisió pel valor de la potencia
+  int   uext              = stoi(args["--uext"].asString());        /// Umbral de decisió pel nombre de extrems relatius de r[k]
+  int   median_error      = stoi(args["--medianfilt"].asString());  /// Nombre d'errors que poden ser eliminats amb postprocessat per filtre de mediana (0 vol dir que no s'aplica filtre)
+  bool cc                 = args["--cclipping"].asBool();           /// Variable que determines wether center-cliping will be applied or not.
+  verbose                 = args["--verbose"].asBool();             /// Chivatos y tal para ver que hacen las cosas
+
+  // Provando - chivato per veure el valor de les variables
+  if (verbose) {
+    cout << "\n\n***************************************\nVariables d'arguments i els seus valors\n***************************************\n";
+    for(auto const& arg : args) {
+        std::cout << arg.first << ": " << arg.second << std::endl;
+    }
   }
-  bool cc = args["--cclipping"].asBool();         /// Variable que determines wether center-cliping will be applied or not.
-  float verbose = args["--verbose"].asBool();     /// Chivatos y tal para ver que hacen las cosas
 
   // Read input sound file
   unsigned int rate;
@@ -83,47 +91,60 @@ int main(int argc, const char *argv[]) {
   // Define analyzer
   PitchAnalyzer analyzer(n_len, rate,umaxnorm, u1norm, upot, uext,PitchAnalyzer::HAMMING, 50, 500);
 
-  /// \TODO
+  // PREPROCESSING
+  /// \TODO Preprocessing
   /// Preprocess the input signal in order to ease pitch estimation. For instance,
   /// central-clipping or low pass filtering may be used.
   
   /// \DONE Central-clipping
   /// If central clipping is enabled (--cclipping has been called), the signal will be central clipped, clipping threshold is 2.5e-4
   vector<float>::iterator iX;
-  if (cc) {
+  if (cc) {                   
+    if (verbose) cout << "\n\n**************\nCenter cliping**************\n\nBefore cc\tAfter cc\n";
     float ucc = 0.00025;
     for(iX = x.begin(); iX < x.end(); iX++){
-      //cout << *iX << "\t";
+      if (verbose) cout << *iX << "\t";
       if (abs(*iX) < ucc) *iX = 0;
-      //cout << *iX << "\n";
+      if (verbose) cout << *iX << "\n";
     }
   }
 
+  /// \TODO Low pass filtering and down sampling
+
+
+
+  // PROCESSING
+  /// Processing
+  // f0 vector creation
   // Iterate for each frame and save values in f0 vector
-  //vector<float>::iterator iX;
   vector<float> f0;
   for (iX = x.begin(); iX + n_len < x.end(); iX = iX + n_shift) {
     float f = analyzer(iX, iX + n_len);
     f0.push_back(f);
   }
 
-  /// \TODO
+
+  // POST-PROCESSING
+  /// \TODO Postprocessing
   /// Postprocess the estimation in order to supress errors. For instance, a median filter
   /// or time-warping may be used.
+
+  /** Chivato(?) - f0 abans del filtre de mediana 
   cout << "\n\nf0 antes\n";
   for(int i=0; i<f0.size() ; i++)
-    cout << f0[i] << "\n";
+    cout << f0[i] << "\n"; **/
+
   /// \DONE Median filter
   /// Median filter, diria, no ho se, em fa por
   /// S'ha de testejar i tal yatusae
   /// Cagun deu l'he fet pel mati tot d'una tirada i no he compilat res, casi em compila a la priemra i no se com va aah
-  int i, j=0;
-  int median_error = 6;                 /// Nombre d'errors que pot corregir el filtre de mediana
-  int median_N = median_error * 2 + 1;  /// Tamany del filtre de mediana per a corregir n errors
-  vector<float> f0_aux = f0;            /// Copia del vector f0 per a fer el processat
-  float buffer_median[median_N];        /// Buffer per a calcular la mediana, fem una especie de circular queue
-
   if (median_error > 0) {
+    int i, j=0;                 
+    int median_N = median_error * 2 + 1;  /// Tamany del filtre de mediana per a corregir n errors
+    vector<float> f0_aux = f0;            /// Copia del vector f0 per a fer el processat
+    float buffer_median[median_N];        /// Buffer per a calcular la mediana, fem una especie de circular queue
+
+    if (verbose) cout << "\n\n*****************\nFiltre de mediana\n*****************"; //chivato filtre de mediana i tal
     for (i = 0; i < median_error; i++) //Els primers valors seran iguals (el filtre comença a la mostra número 'median_error')
       f0[i] = f0_aux[i];
     
@@ -133,26 +154,33 @@ int main(int argc, const char *argv[]) {
     //Filtre de mediana comença
     float aux;
     for (i = median_error; i < f0.size() - median_error; i++) { //Recorrem el vector f0
-      cout.precision(2);
+      //if (verbose) cout.precision(2);
       //Chivato pa ver que ordena bien
-      //cout << "\n\n" << i << "\n";
-      cout << "\n\n";
-      for (j=0; j<median_N ; j++)
-        cout << buffer_median[j] << "\t";
+      if (verbose) { //primera part del chivato, el buffer de tamany median_N sense ordenar
+        //cout << "\n\n" << i << "\n";
+        cout << "\n";
+        for (j=0; j<median_N ; j++)
+          cout << buffer_median[j] << "\t";
+      }
       j=0;
       while(j != median_N-1) {
         if(buffer_median[j] > buffer_median[j+1]){
           aux = buffer_median[j];                 //intercanvi de valors si no estan ordenats
           buffer_median[j] = buffer_median[j+1];
           buffer_median[j+1] = aux;
-          j = (j>0)? j-2 : j;                          //si ha hagut canvi, torna enrere per veure si ha de tornar-la a canviar la que ha baixat
+          if (j>0) j-=2;                          //si ha hagut canvi, torna enrere per veure si ha de tornar-la a canviar la que ha baixat
+          //j = (j>0)? j-2 : j;
         } 
         j++;                   //si ja estaven ordenats, segueix avançant a ver que onda
       } //en principi esta ja el vector ordenat
 
-      cout << "\n";
-      for (j=0; j<median_N ; j++)
-        cout << buffer_median[j] << "\t";
+      if (verbose) { //Segona part del filtre, el buffer ordenat
+        cout << "\n";
+        for (j=0; j<median_N ; j++)
+          cout << buffer_median[j] << "\t";
+      
+        cout << "\n";      
+      }
 
       f0[i] = buffer_median[median_error]; //Posem el valor corresponent al vector f0
   //    for(j=i-median_error; j<i+median_error;j++) 
@@ -160,9 +188,14 @@ int main(int argc, const char *argv[]) {
         buffer_median[j] = f0_aux[i + j - median_error];
     }
   }
+
+  /** Chivato (?)
   cout << "\n\nDespués: \n";
   for(i=0; i<f0.size() ; i++)
     cout << f0[i] << "\n";
+  **/
+
+
   // Write f0 contour into the output file
   ofstream os(output_txt);
   if (!os.good()) {
