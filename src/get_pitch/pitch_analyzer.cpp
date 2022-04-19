@@ -83,9 +83,16 @@ namespace upc {
       cout.precision(6);
       cout << fixed << "\t" << r1norm << "\t" << rmaxnorm << "\t" << pot << "\t" << samplingFreq << "\t" << frameLen << "\t";
     }
-
+    // En orden de derecha a izquierda:
+    // Extremos relativos (maximos y minimos) encontrados en la autocorrelación
+    //    -> la correlación de fonemas sonoros suele ser más "fluida" y tiene menos extremos
+    // El calculo de r[1]/r[0]    
+    //    -> Este valor es practicamente 1 en las funciones sonoras, i inferior en las sordas
+    // El calculo de r[lag]/r[0]  
+    //    -> El valor del maximo (relativo al pitch) suele ser mayor en las sonoras
+    // La potencia de la señal    
+    //    -> Las señales de fonemas sordos tienen muy poca energia y potencia, por lo general; menos que las sonoras
     if( ext < uext || r1norm > u1norm || rmaxnorm > umaxnorm || pot > upot) return false;
-    //if(r1norm > u1norm || rmaxnorm > umaxnorm || pot > upot) return false;
     if (verbose) cout << "sordo";
     return true;
   }

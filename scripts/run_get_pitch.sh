@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ $# -ne 1 ]; then
 
-    ds="4   "
+    f="1"
     #echo "Usage: $0 alpha1 alpha2"
     #exit -1
 else
@@ -9,8 +9,9 @@ else
 #    um=$2
 #    u1=$3
 #    pot=$4
-    ds=$1
+    f=$1
 fi
+ds="4"
 um="0.45"
 u1="0.95"
 pot="-20"
@@ -19,7 +20,7 @@ ex="0"
 #GETF0="get_pitch --umaxnorm=$um --u1norm=$u1 --upot=$pot --uext=$ex"
 #GETF0="get_pitch --umaxnorm=$um --upot=$pot --uext=$ex"
 #GETF0="get_pitch --cclipping --umaxnorm=$um --uext=$ex"
-GETF0="get_pitch --cclipping=0.009 --umaxnorm=$um --u1norm=$u1 --upot=$pot --uext=$ex --downsampl=$ds"
+GETF0="get_pitch --cclipping=0.009 --umaxnorm=$um --u1norm=$u1 --upot=$pot --uext=$ex --downsampl=$ds --lpfwindow=$f"
 
 for fwav in pitch_db/train/*.wav; do
     ff0=${fwav/.wav/.f0}

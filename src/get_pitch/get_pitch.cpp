@@ -114,6 +114,7 @@ int main(int argc, const char *argv[]) {
   /// The threshold is relative to the maximum amplitud in the vector x.<br>
   /// Testing, it is seen a slight increase in the performance result. <br>
   /// Default clipping threshold is 0.009 (0.9%)
+  // Central clipping
   vector<float>::iterator iX;
   float max_x = *max_element(x.begin(), x.end());
   if (cc > 0) {                   
@@ -121,7 +122,6 @@ int main(int argc, const char *argv[]) {
     for(iX = x.begin(); iX < x.end(); iX++){
       if (verbose) cout << *iX << "\t";
       if ( (abs(*iX) / max_x ) < cc) *iX = 0;
-//      if (abs(*iX) < ucc) *iX = 0;
       if (verbose) cout << *iX << "\n";
     }
   }
