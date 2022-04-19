@@ -1,26 +1,25 @@
 #!/bin/bash
-if [ $# -ne 6 ]; then
-    c="0.009"
-    um="0.4"
-    u1="0.9"
-    pot="-20"
-    ex="0"
-    ds="1"
+if [ $# -ne 1 ]; then
+
+    ds="4"
     #echo "Usage: $0 alpha1 alpha2"
     #exit -1
 else
-    c=$1
-    um=$2
-    u1=$3
-    pot=$4
-    ex=$5
-    ds=$6
+#    ex=$1
+#    um=$2
+#    u1=$3
+#    pot=$4
+    ds=$1
 fi
+um="0.45"
+u1="0.95"
+pot="-20"
+ex="0"
 # Put here the program (maybe with path)
 #GETF0="get_pitch --umaxnorm=$um --u1norm=$u1 --upot=$pot --uext=$ex"
 #GETF0="get_pitch --umaxnorm=$um --upot=$pot --uext=$ex"
 #GETF0="get_pitch --cclipping --umaxnorm=$um --uext=$ex"
-GETF0="get_pitch --cclipping=0.001 --umaxnorm=$um --u1norm=$u1 --upot=$pot --uext=$ex --downsampl=$ds --lpfwindow=1"
+GETF0="get_pitch --cclipping=0.009 --umaxnorm=$um --u1norm=$u1 --upot=$pot --uext=$ex --downsampl=$ds"
 
 for fwav in pitch_db/train/*.wav; do
     ff0=${fwav/.wav/.f0}

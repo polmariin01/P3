@@ -22,10 +22,8 @@ namespace upc {
     //Calcul de la autocorrelació
     for (unsigned int l = 0; l < r.size(); ++l) {
       r[l] = 0;
-      //for (unsigned int n = l; n < x.size(); n++) 
-      // r[l] += x[n] * x[n - l];
-      for (unsigned int n = l; n < x.size() - 1; n++) 
-        r[l] += x[n] * x[n + l];
+      for (unsigned int n = l; n < x.size(); n++) 
+       r[l] += x[n] * x[n - l];
     
       r[l] /= x.size();
     }
@@ -79,14 +77,15 @@ namespace upc {
     /// * Compara potencia
     /// * Compara extrems relatius de la autocorrelació
     /// .
-    /// No acaba d'anar bé :(
+    /// Lo ideal seria aplicar una especia de funció aritmètica amb tots els valors i buscar un valor òptim que multipliques a cada valor. <br>
+    /// Ara mateix la "regió unvoiced" està creada per llindars ens les dimensions de cada paràmetre.
     if (verbose) {
       cout.precision(6);
       cout << fixed << "\t" << r1norm << "\t" << rmaxnorm << "\t" << pot << "\t" << samplingFreq << "\t" << frameLen << "\t";
     }
 
-    //if( ext < uext || r1norm > u1norm || rmaxnorm > umaxnorm || pot > upot) return false;
-    if(r1norm > u1norm || rmaxnorm > umaxnorm || pot > upot) return false;
+    if( ext < uext || r1norm > u1norm || rmaxnorm > umaxnorm || pot > upot) return false;
+    //if(r1norm > u1norm || rmaxnorm > umaxnorm || pot > upot) return false;
     if (verbose) cout << "sordo";
     return true;
   }
@@ -116,14 +115,35 @@ namespace upc {
     /// In either case, the lag should not exceed that of the minimum value of the pitch.
 
     /// \DONE
-    /// Diria, no estic gaire segur
-    /// Aviam, diria que troba bé el màxim, pero
+    /// Maximum value of the autocorrelation found.
+    //cout.precision(3);
+    //if (verbose) cout << "\n\n**************************************************Autocorrleacio************+\n";
 
+
+    //Metode per trobar el segon màxim 1
+    
     unsigned int ext = 0; //extrems (maxims o minims) que hi ha a la autocorrelació
+    
     for(iR = iRMax = r.begin() + npitch_min; iR < r.begin() + npitch_max; iR++){
       if(*iR > *iRMax) iRMax = iR;
+      //if (verbose) cout << *iRMax * 10e6 << "\t\t";
       if(iR != r.begin() && iR != r.end() && (*iR-*prev(iR,1))*(*next(iR,1)-*iR) < 0) ext++;
+      //if (verbose) cout << *prev(iR,1) * 10e6 << "\t" << *iR * 10e6 << "\t" << *next(iR,1) * 10e6 << "\n";
     }
+
+    //Metode per trobar el segon maxim 2
+    /*
+    iR = r.begin();
+    while (*iR > 0)
+      advance(iR,1);
+    //if (verbose) cout << "Wea salimos pa fuera\n";
+    iRMax = iR;
+    while (iR != r.end()) { //(iR != r.begin() + npitch_min)
+      if(*iR > *iRMax) iRMax = iR;
+      iR++;
+    }
+    */
+
     if (verbose) cout << "\n" << ext;
 
     unsigned int lag = iRMax - r.begin();
@@ -133,7 +153,7 @@ namespace upc {
     //You can print these (and other) features, look at them using wavesurfer
     //Based on that, implement a rule for unvoiced
     //change to #if 1 and compile
-#if 1
+#if 0
     if (r[0] > 0.0F)
       cout << pot << '\t' << r[1]/r[0] << '\t' << r[lag]/r[0] << endl;
 #endif

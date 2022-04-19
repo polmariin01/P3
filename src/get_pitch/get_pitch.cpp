@@ -78,8 +78,8 @@ int main(int argc, const char *argv[]) {
   float aux;                 
 
   if (lpfwindow != 0 && lpfwindow != 1) lpfwindow = 1;
-  if (fN < 1 || fN > 64) fN = 1;
-  fN = 1;
+  if (fN < 1 || fN > 5) fN = 4;
+  //fN = 1;
 
   // Provando - chivato per veure el valor de les variables
   if (verbose) {
@@ -97,7 +97,7 @@ int main(int argc, const char *argv[]) {
     return -2;
   }
 
-  // rate /= fN;
+  rate /= fN;
   int n_len = rate * FRAME_LEN;
   int n_shift = rate * FRAME_SHIFT;
 
@@ -110,7 +110,10 @@ int main(int argc, const char *argv[]) {
   /// central-clipping or low pass filtering may be used.
   
   /// \DONE PRE-PROCESSING. Central-clipping<br>
-  /// If central clipping is enabled (--cclipping has been called), the signal will be central clipped, clipping threshold is 2.5e-4
+  /// If central clipping is enabled (--cclipping=FLOAT, with FLOAT greater than 0), the signal will be central clipped.
+  /// The threshold is relative to the maximum amplitud in the vector x.<br>
+  /// Testing, it is seen a slight increase in the performance result. <br>
+  /// Default lipping threshold is 0.009
   vector<float>::iterator iX;
   float max_x = *max_element(x.begin(), x.end());
   if (cc > 0) {                   
@@ -124,6 +127,15 @@ int main(int argc, const char *argv[]) {
   }
 
   /// \TODO Low pass filtering and down sampling
+
+  /// \DONE Los pass filtering and down sampling
+  /// Two filters have been added. Both filters are convolutional, and the length of the h[n] is determined by 'fN'.
+  /// 
+  /// * Rectangular filter.
+  ///   Is a rectangular filter, the n values are multiplied by the same factor.
+  /// * Triangular filter
+  ///   Is a triangular filter, which takes fN-1 samples forward and fN-1 backward
+  /// . 
   if (fN > 1) {
     int nouS = x.size()/fN;
     vector<float> x_ds(nouS); // X downsampled
@@ -131,25 +143,46 @@ int main(int argc, const char *argv[]) {
 
     if(lpfwindow == 0) {
       // Filtre rectangular de N mostres
+      cout.precision(6);
+      
       if (verbose) cout << "FILTRE RECTANGULAR, n = " << fN << "\n";
       for(i = 0; i < nouS; i++){
         x_ds[i] = x[fN*i];
+        if (verbose) cout << x[fN*i] << "\t";
         for (j = 1; j < fN; j++) {
           x_ds[i] += x[fN*i + j];
+          if (verbose) cout << x[fN*i + j] << "\t";
         }
         x_ds[i] = x_ds[i] / fN;
+        if (verbose) cout << ": " << x_ds[i] << "\n";
       }
     } else {
       //Filtre triangular de N mostres
       if (verbose) cout << "FILTRE TRIANGULAR, n = " << fN << "\n";
       for (i = 0; i < nouS; i++) {
         x_ds[i] = x[fN*i];
+        if (verbose) cout << x[fN*i] << "\t";
         for (j = 1; j < fN; j++) {
           aux = (i>0)? x[fN*i + j] + x[fN*i - j] : x[fN*i + j];
           x_ds[i] += (1 - j / fN) * aux;
         }
-        x_ds[i] = (i>0)? aux / fN : (aux*2 / (fN+1));
+        x_ds[i] /= (i>0)? fN : (fN+1)/2;
+        if (verbose) cout << ": " << x_ds[i] << "\n";
       }
+
+/*
+      if (verbose) cout << "FILTRE TRIANGULAR, n = " << fN << "\n";
+      for (i = 0; i < nouS; i++) {
+        x_ds[i] = x[fN*i];
+        if (verbose) cout << x[fN*i] << "\t";
+        for (j = 1; j < fN; j++) {
+          aux = (i>0)? x[fN*i + j] + x[fN*i - j] : x[fN*i + j];
+          x_ds[i] += (1 - j / fN) * aux;
+        }
+        x_ds[i] /= (i>0)? fN : (fN+1)/2;
+        if (verbose) cout << ": " << x_ds[i] << "\n";
+      }
+      */
     }
     x.resize(nouS);
     x = x_ds;
@@ -176,15 +209,17 @@ int main(int argc, const char *argv[]) {
   /// or time-warping may be used.
 
   /// \DONE Median filter
-  /// Median filter, diria, no ho se, em fa por
-  /// S'ha de testejar i tal yatusae
-  /// Cagun deu l'he fet pel mati tot d'una tirada i no he compilat res, casi em compila a la priemra i no se com va aah
+  /// The signal is post-processed through a median filter. Calling the program you can choose the numbers of errors that the filter can fix.
+  /// That means that if you have N values that are abruptly different from the signal, if it is set median_error=N, those errors would be vanished.
+  /// That makes the filter length to be N*2+1.<br>
+  /// Despite its complexity and our initial hope before testing, the results didn't come to be as expecteds.
+  /// Then, it can be used but it won't be used as default.
   if (median_error > 0) {     // Si entra aqui vol dir que d'utilitza filtre de mediana
     if (verbose) cout << "\n*****************\nFiltre de mediana\n*****************"; //chivato filtre de mediana i tal
 
-    int median_N = median_error * 2 + 1;  /// Tamany del filtre de mediana per a corregir n errors
-    vector<float> f0_aux = f0;            /// Copia del vector f0 per a fer el processat
-    float buffer_median[median_N];        /// Buffer per a calcular la mediana, fem una especie de circular queue
+    int median_N = median_error * 2 + 1;  ///< Tamany del filtre de mediana per a corregir n errors
+    vector<float> f0_aux = f0;            ///< Copia del vector f0 per a fer el processat
+    float buffer_median[median_N];        ///< Buffer per a calcular la mediana, fem una especie de circular queue
 
     //S'inicialitzen els valors per a fer el filtre
     for (i = 0; i < median_error; i++)    // Els primers valors seran iguals (el filtre comença a la mostra número 'median_error')
@@ -208,28 +243,28 @@ int main(int argc, const char *argv[]) {
       j=0;
       while(j != median_N-1) {  /// \TODO Cambiar esto por un for iria bien?
         if(buffer_median[j] > buffer_median[j+1]){
-          aux = buffer_median[j];                 //intercanvi de valors si no estan ordenats
+          aux = buffer_median[j];                 // intercanvi de valors si no estan ordenats
           buffer_median[j] = buffer_median[j+1];
           buffer_median[j+1] = aux;
-          if (j>0) j-=2;                          //si ha hagut canvi, torna enrere per veure si ha de tornar-la a canviar la que ha baixat
+          if (j>0) j-=2;                          // si ha hagut canvi, torna enrere per veure si ha de tornar-la a canviar la que ha baixat
           //j = (j>0)? j-2 : j;
         } 
-        j++;                   //si ja estaven ordenats, segueix avançant a ver que onda
-      } //en principi esta ja el vector ordenat
+        j++;                   // si ja estaven ordenats, segueix avançant a ver que onda
+      } // en principi esta ja el vector ordenat
 
-      if (verbose) { //Segona part del chivato, el buffer ordenat
+      if (verbose) { // Segona part del chivato, el buffer ordenat
         cout << "\n";
         for (j=0; j<median_N ; j++)
           cout << buffer_median[j] << "\t";      
         cout << "\n";      
       } //Just a chivato
-      f0[i] = buffer_median[median_error]; //Posem el valor corresponent al vector f0
-      for(j = 0; j < median_N; j++)  //Tornem a crear el vector amb els valors directes del vector f0
+      f0[i] = buffer_median[median_error]; // Posem el valor corresponent al vector f0
+      for(j = 0; j < median_N; j++)  // Tornem a crear el vector amb els valors directes del vector f0
         buffer_median[j] = f0_aux[i + j - median_error];
     }
   }
-  //Aqui acaba el filtre de mediana, pa ir ubicaos i tal
-  //END POST-PROCESSING                          
+  // Aqui acaba el filtre de mediana, pa ir ubicaos i tal
+  // END POST-PROCESSING                          
   if (verbose) cout << "\n\n*****************\nProcessat acabat!\n*****************\n\n";
 
 
