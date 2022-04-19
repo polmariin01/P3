@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ $# -ne 1 ]; then
 
-    ds="4"
+    ds="4   "
     #echo "Usage: $0 alpha1 alpha2"
     #exit -1
 else

@@ -113,7 +113,7 @@ int main(int argc, const char *argv[]) {
   /// If central clipping is enabled (--cclipping=FLOAT, with FLOAT greater than 0), the signal will be central clipped.
   /// The threshold is relative to the maximum amplitud in the vector x.<br>
   /// Testing, it is seen a slight increase in the performance result. <br>
-  /// Default lipping threshold is 0.009
+  /// Default clipping threshold is 0.009 (0.9%)
   vector<float>::iterator iX;
   float max_x = *max_element(x.begin(), x.end());
   if (cc > 0) {                   
@@ -125,8 +125,6 @@ int main(int argc, const char *argv[]) {
       if (verbose) cout << *iX << "\n";
     }
   }
-
-  /// \TODO Low pass filtering and down sampling
 
   /// \DONE Los pass filtering and down sampling
   /// Two filters have been added. Both filters are convolutional, and the length of the h[n] is determined by 'fN'.
