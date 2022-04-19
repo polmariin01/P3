@@ -17,6 +17,7 @@ Ejercicios básicos
 	<p align="center">
 	<img src="img/autocorrafacio.PNG">
 	</p>
+	
    * Inserte una gŕafica donde, en un *subplot*, se vea con claridad la señal temporal de un segmento de
      unos 30 ms de un fonema sonoro y su periodo de pitch; y, en otro *subplot*, se vea con claridad la
 	 autocorrelación de la señal y la posición del primer máximo secundario.
@@ -38,17 +39,17 @@ Ejercicios básicos
 	</p>
 		*Como hemos visto en el apartado anterior, la distancia al primer máximo secundario de la autocorrelación
 		nos da el periodo del pitch. Con la frecuencia de muestreo podemos obtener el pitch, en el caso de la
-		foto anterior seria de unos 122Hz.*
+		foto anterior seria de unos 122Hz*
 
    * Implemente la regla de decisión sonoro o sordo e inserte el código correspondiente.
 
      	<p align="center">
 	<img src="img/unvoiced_decision.PNG">
 	</p>
-	*Para tomar la decisión sonoro/sordo usamos los parámetros explicados en la foto.<br>
-	Al ser lindares o thresholds, el espacio 'sordo' està acotado por lindares en cada dimensión de los paràmetros.
-	Para otro proyecto vemos más conveniente usar alguna expresión aritmètica que relacione varios parametros entre si
-	para tomar la decisión conjunta i crear un espacio "menos cuadrado".*
+		*Para tomar la decisión sonoro/sordo usamos los parámetros explicados en la foto.<br>
+		Al ser lindares o thresholds, el espacio 'sordo' està acotado por lindares en cada dimensión de los paràmetros.
+		Para otro proyecto vemos más conveniente usar alguna expresión aritmètica que relacione varios parametros entre si
+		para tomar la decisión conjunta i crear un espacio "menos cuadrado"*
 
 
 - Una vez completados los puntos anteriores, dispondrá de una primera versión del estimador de pitch. El 
@@ -66,6 +67,8 @@ Ejercicios básicos
 
 	    Recuerde configurar los paneles de datos para que el desplazamiento de ventana sea el adecuado, que
 		en esta práctica es de 15 ms.
+		
+		<img src="img/wavesurfer_pow.PNG">
 
       - Use el estimador de pitch implementado en el programa `wavesurfer` en una señal de prueba y compare
 	    su resultado con el obtenido por la mejor versión de su propio sistema.  Inserte una gráfica
@@ -73,7 +76,10 @@ Ejercicios básicos
      
 		Aunque puede usar el propio Wavesurfer para obtener la representación, se valorará
 	 	el uso de alternativas de mayor calidad (particularmente Python).
-  
+		
+  		<img src="img/wavesurfer_pitch.PNG">
+			*Podem veure el pitch esperat (a dalt) i el pitch que hem detectat (a sota).*
+		
   * Optimice los parámetros de su sistema de estimación de pitch e inserte una tabla con las tasas de error
     y el *score* TOTAL proporcionados por `pitch_evaluate` en la evaluación de la base de datos 
 	`pitch_db/train`..
@@ -90,6 +96,9 @@ Ejercicios de ampliación
 
   * Inserte un *pantallazo* en el que se vea el mensaje de ayuda del programa y un ejemplo de utilización
     con los argumentos añadidos.
+    
+    <img src="img/help.PNG">
+
 
 - Implemente las técnicas que considere oportunas para optimizar las prestaciones del sistema de estimación
   de pitch.
@@ -127,7 +136,7 @@ Ejercicios de ampliación
 		*Una posibilidad que ofrece nuestro programa es el uso del center-clipping. Usando la opcion `--cclipping=FLOAT` 
 		se puede escogerel valor que tomarà este threshold. El lindar tiene un valor relativo, entre 0 i el valor máximo de la senyal.
 		El valor óptimo que hemos encontrado es 0.009.<br>
-		Esta técnica nos ha resultado bastante útil i ha subido bastante el % de nuestro resultado.*
+		Esta técnica nos ha resultado bastante útil i ha subido bastante el % de nuestro resultado*
 		<img src="img/central_clipping.PNG">
 
 	+ Filtrado paso bajo y diezmado
@@ -139,10 +148,10 @@ Ejercicios de ampliación
 		y `==lpfwindow=INT` para escoger la ventana deseada (0: rectangular, 1: triangular)*
 		
 		<img src="img/filtro_rect_tri.PNG">
-		Resultado obtenido usando los dos filtros i con los otros parametros igual
+			*Resultado obtenido usando los dos filtros i con los otros parametros igual*
 		
 		<img src="img/Diezmado _resultado.PNG">
-		Diezmando por diferentes factores vemos como mejora el resultado
+			*Diezmando por diferentes factores vemos como mejora el resultado*
 		
   * Técnicas de postprocesado
 
@@ -150,30 +159,31 @@ Ejercicios de ampliación
 		*También hemos aplicado el filtro de mediana. El usuario puede escoger el número de errores que corrige.
 		Por lo tanto, si este valor es N, se calculará la mediana de 2N+1 valores.<br>
 		Lamentablemente, no ha mostrado muy buenos resultados, aunque el filtro funciona estupendapente.
-		Aun así està disponible para ser usado con el argumento `==medianfilt=INT`.*
+		Aun así està disponible para ser usado con el argumento `==medianfilt=INT`*
 		
 		<img src="img/filtro_mediana_orden.PNG">
-		*En la imagen vemos como funciona bien, este es un filtro que cubre 2 errores. Se ve como coje del vector grande
+			*En la imagen vemos como funciona bien, este es un filtro que cubre 2 errores. Se ve como coje del vector grande
 		5 muestras desplazando una muestra a cada repetición y lo ordena. Los packs de dos lineas, la linea de arriba es
-		el vector sin ordenar i la de abajo el vector ordenado.*
+		el vector sin ordenar i la de abajo el vector ordenado*
 
   * Hemos usado la autocorrelación normal.
 	
   * Optimización de los parámetros
   	
-	*Uilizando fors en bash hemos encontrado los máximos de los parametros que podemos introducir como argumentos.*
+	*Uilizando fors en bash hemos encontrado los máximos de los parametros que podemos introducir como argumentos*
 	<img src="img/umax_u1.PNG">
 	
     
   * Cualquier otra técnica que se le pueda ocurrir o encuentre en la literatura.
 
-	*Hemos utilizado una técnica que se nos ha ocurrido que es buscar los extremos relativos de la función de correlación.*
+	*Hemos utilizado una técnica que se nos ha ocurrido que es buscar los extremos relativos de la función de correlación*
 	
-	<img src="img/busca_exterms_correlacio - unvoiced 1jpg">
+	<img src="img/busca_exterms_correlacio - unvoiced 1.jpg">
 	<img src="img/busca_exterms_correlacio - unvoiced 2.jpg">
-	*Vemos que en los fragmentos voiced la correlación tiene muchos extremos.*
+		*Vemos que en los fragmentos unvoiced la correlación tiene muchos extremos*
 	<img src="img/busca_exterms_correlacio - unvoiced 2.jpg">
 	<img src="img/busca_exterms_correlacio - unvoiced 2.jpg">
+		*Y que los fragmentos voiced la correlación no tiene tantos*
 	
 
    
