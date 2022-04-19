@@ -25,18 +25,17 @@ Usage:
     get_pitch --version
 
 Options:
-    -m FLOAT, --umaxnorm=FLOAT  Umbral de l'autocorrelacion a largo plazo [default: 0.4]
-    -n FLOAT, --u1norm=FLOAT    Umbral de l'autocorrelacion a corto plazo [default: 0.9]
+    -m FLOAT, --umaxnorm=FLOAT  Umbral de l'autocorrelacion a largo plazo [default: 0.44]
+    -n FLOAT, --u1norm=FLOAT    Umbral de l'autocorrelacion a corto plazo [default: 1]
     -p FLOAT, --upot=FLOAT      Umbral de la potencia [default: 0]
-    -c FLOAT, --cclipping       Relative threshold used for central clipping pre-processing [default: 0.009]
-    -e INT, --uext=INT          Umbral del numero de extremos relativos de la correlación [default: 100]
+    -c FLOAT, --cclipping       Relative threshold used for central clipping pre-processing [default: 0.0265]
+    -e INT, --uext=INT          Umbral del numero de extremos relativos de la correlación [default: 0]
     -f INT, --medianfilt=INT    Number of errors that can be erased with a median filter (0 means no filter) [default: 0]
     -d INT, --downsampl=INT     Downsampling (+ LowPassFilter) factor (1 means no filter, d>=0) [default: 1]
-    -w INT, --lpfwindow=INT     LPW function (0: rectangular, 1: triangular) [default: 1]
+    -w INT, --lpfwindow=INT     LPW function (0: rectangular, 1: triangular) [default: 4]
     -v, --verbose               For debugging purposes, shows on screen numbers and things while running the program
     -h, --help  Show this screen
     --version   Show the version of the project
-    
 
 Arguments:
     input-wav   Wave file with the audio signal
@@ -109,22 +108,6 @@ int main(int argc, const char *argv[]) {
   /// Preprocess the input signal in order to ease pitch estimation. For instance,
   /// central-clipping or low pass filtering may be used.
   
-  /// \DONE PRE-PROCESSING. Central-clipping<br>
-  /// If central clipping is enabled (--cclipping=FLOAT, with FLOAT greater than 0), the signal will be central clipped.
-  /// The threshold is relative to the maximum amplitud in the vector x.<br>
-  /// Testing, it is seen a slight increase in the performance result. <br>
-  /// Default clipping threshold is 0.009 (0.9%)
-  // Central clipping
-  vector<float>::iterator iX;
-  float max_x = *max_element(x.begin(), x.end());
-  if (cc > 0) {                   
-    if (verbose) cout << "\n\n**************\nCenter cliping**************\n\nBefore cc\tAfter cc\n";
-    for(iX = x.begin(); iX < x.end(); iX++){
-      if (verbose) cout << *iX << "\t";
-      if ( (abs(*iX) / max_x ) < cc) *iX = 0;
-      if (verbose) cout << *iX << "\n";
-    }
-  }
 
   /// \DONE Los pass filtering and down sampling
   /// Two filters have been added. Both filters are convolutional, and the length of the h[n] is determined by 'fN'.
@@ -185,6 +168,26 @@ int main(int argc, const char *argv[]) {
     x.resize(nouS);
     x = x_ds;
   }
+
+  /// \DONE PRE-PROCESSING. Central-clipping<br>
+  /// If central clipping is enabled (--cclipping=FLOAT, with FLOAT greater than 0), the signal will be central clipped.
+  /// The threshold is relative to the maximum amplitud in the vector x.<br>
+  /// Testing, it is seen a slight increase in the performance result. <br>
+  /// Default clipping threshold is 0.0265 (2.65%)
+  // Central clipping
+  vector<float>::iterator iX;
+  float max_x = *max_element(x.begin(), x.end());
+  if (cc > 0) {                   
+    if (verbose) cout << "\n\n**************\nCenter cliping**************\n\nBefore cc\tAfter cc\n";
+    for(iX = x.begin(); iX < x.end(); iX++){
+      if (verbose) cout << *iX << "\t";
+      if ( (abs(*iX) / max_x ) < cc) *iX = 0;
+      if (verbose) cout << *iX << "\n";
+    }
+  }
+
+
+
 
   // PROCESSING
   /// Processing
