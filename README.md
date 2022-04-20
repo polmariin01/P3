@@ -70,7 +70,7 @@ Ejercicios básicos
 		
 		<img src="img/wavesurfer_pow.PNG">
 
-      - Use el estimador de pitch implementado en el programa `wavesurfer` en una señal de prueba y compare
+      	- Use el estimador de pitch implementado en el programa `wavesurfer` en una señal de prueba y compare
 	    su resultado con el obtenido por la mejor versión de su propio sistema.  Inserte una gráfica
 		ilustrativa del resultado de ambos estimadores.
      
@@ -78,6 +78,7 @@ Ejercicios básicos
 	 	el uso de alternativas de mayor calidad (particularmente Python).
 		
   		<img src="img/wavesurfer_pitch.PNG">
+		
 			*Podem veure el pitch esperat (a dalt) i el pitch que hem detectat (a sota).*
 		
   * Optimice los parámetros de su sistema de estimación de pitch e inserte una tabla con las tasas de error
@@ -137,6 +138,7 @@ Ejercicios de ampliación
 		se puede escogerel valor que tomarà este threshold. El lindar tiene un valor relativo, entre 0 i el valor máximo de la senyal.
 		El valor óptimo que hemos encontrado es 0.009.<br>
 		Esta técnica nos ha resultado bastante útil i ha subido bastante el % de nuestro resultado*
+		
 		<img src="img/central_clipping.PNG">
 
 	+ Filtrado paso bajo y diezmado
@@ -148,9 +150,11 @@ Ejercicios de ampliación
 		y `==lpfwindow=INT` para escoger la ventana deseada (0: rectangular, 1: triangular)*
 		
 		<img src="img/filtro_rect_tri.PNG">
+		
 			*Resultado obtenido usando los dos filtros i con los otros parametros igual*
 		
 		<img src="img/Diezmado _resultado.PNG">
+		
 			*Diezmando por diferentes factores vemos como mejora el resultado*
 		
   * Técnicas de postprocesado
@@ -162,6 +166,7 @@ Ejercicios de ampliación
 		Aun así està disponible para ser usado con el argumento `==medianfilt=INT`*
 		
 		<img src="img/filtro_mediana_orden.PNG">
+		
 			*En la imagen vemos como funciona bien, este es un filtro que cubre 2 errores. Se ve como coje del vector grande
 		5 muestras desplazando una muestra a cada repetición y lo ordena. Los packs de dos lineas, la linea de arriba es
 		el vector sin ordenar i la de abajo el vector ordenado*
@@ -171,6 +176,7 @@ Ejercicios de ampliación
   * Optimización de los parámetros
   	
 	*Uilizando fors en bash hemos encontrado los máximos de los parametros que podemos introducir como argumentos*
+	
 	<img src="img/umax_u1.PNG">
 	
     
@@ -180,9 +186,13 @@ Ejercicios de ampliación
 	
 	<img src="img/busca_exterms_correlacio - unvoiced 1.jpg">
 	<img src="img/busca_exterms_correlacio - unvoiced 2.jpg">
+	
 		*Vemos que en los fragmentos unvoiced la correlación tiene muchos extremos*
-	<img src="img/busca_exterms_correlacio - unvoiced 2.jpg">
-	<img src="img/busca_exterms_correlacio - unvoiced 2.jpg">
+		
+		
+	<img src="img/busca_exterms_correlacio - voiced 1.jpg">
+	<img src="img/busca_exterms_correlacio - voiced 2.jpg">
+	
 		*Y que los fragmentos voiced la correlación no tiene tantos*
 	
 
